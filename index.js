@@ -20,17 +20,14 @@ app.use((req, res) => {
 
 io.on('connection', socket => {
   const interval = setInterval(async () => {
-    const consumer = eventBus.getConsumer('isOnline');
-    if (consumer) {
-      consumer.consume(data => {
-        try {
-          const user = JSON.parse(data.content.toString());
-          socket.emit('isOnline', user);
-        } catch (e) {
-          console.error('Invalid event format');
-        }
-      });
-    }
+    eventBus.consume('isOnline', data => {
+      try {
+        const user = JSON.parse(data.content.toString());
+        socket.emit('isOnline', user);
+      } catch (e) {
+        console.error('Invalid event format');
+      }
+    });
   }, 3000);
 
   socket.on('disconnect', () => {
@@ -38,10 +35,16 @@ io.on('connection', socket => {
   });
 });
 
-eventBus.connect(process.env.RABBITMQ_URI, () => {
-  server.listen(process.env.PRESENCE_SERVICE_PORT, () => {
-    console.log(
-      `Server is running on port ${process.env.PRESENCE_SERVICE_PORT}`,
-    );
-  });
-});
+eventBus.connect(
+  process.env.RABBITMQ_URI,
+  () => {
+    server.listen(process.env.PRESENCE_SERVICE_PORT, () => {
+      console.log(
+        `Server is running on port ${process.env.PRESENCE_SERVICE_PORT}`,
+      );
+    });
+  },
+  {
+    reconnectTimeout: 10000,
+  },
+);
