@@ -23,7 +23,7 @@ io.on('connection', socket => {
     eventBus.consume('isOnline', data => {
       try {
         const user = JSON.parse(data.content.toString());
-        socket.emit('isOnline', user);
+        socket.volatile.emit('isOnline', user);
       } catch (e) {
         console.error('Invalid event format');
       }
@@ -35,16 +35,10 @@ io.on('connection', socket => {
   });
 });
 
-eventBus.connect(
-  process.env.RABBITMQ_URI,
-  () => {
-    server.listen(process.env.PRESENCE_SERVICE_PORT, () => {
-      console.log(
-        `Server is running on port ${process.env.PRESENCE_SERVICE_PORT}`,
-      );
-    });
-  },
-  {
-    reconnectTimeout: 10000,
-  },
-);
+eventBus.connect(process.env.RABBITMQ_URI, () => {
+  server.listen(process.env.PRESENCE_SERVICE_PORT, () => {
+    console.log(
+      `Server is running on port ${process.env.PRESENCE_SERVICE_PORT}`,
+    );
+  });
+});

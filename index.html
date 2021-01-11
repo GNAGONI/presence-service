@@ -31,11 +31,14 @@
           $('#m').val('');
           return false;
         });
+        socket.on("connect", () => {
+          console.log('Successfully connected to the server')
+        });
         socket.on('isOnline', function(user){
-          console.log(user);
-          $(`#${user.userId}`).remove();
+          console.log(new Date(), user);
+          $(`#${user.sessionId}`).remove();
           if (user.isOnline) {
-            $('#messages').append($(`<li id=${user.userId}>`).text(user.userEmail));
+            $('#messages').append($(`<li id=${user.sessionId}>`).text(user.userEmail));
           }
         });       
       });
